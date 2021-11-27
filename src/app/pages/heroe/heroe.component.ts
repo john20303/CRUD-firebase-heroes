@@ -4,6 +4,7 @@ import {NgForm} from '@angular/forms';
 import {HeroesService} from "../../services/heroes.service";
 import Swal from "sweetalert2";
 import {Observable} from "rxjs";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-heroe',
@@ -13,13 +14,22 @@ import {Observable} from "rxjs";
 export class HeroeComponent implements OnInit {
 
   heroe: HeroeModel = new HeroeModel();
+  id: any = {};
 
-
-  constructor(private _heroe: HeroesService) {
+  constructor(private _heroe: HeroesService, private _route: ActivatedRoute, private _router: Router) {
 
   }
 
   ngOnInit(): void {
+    this.id = this._route.snapshot.paramMap.get('id');
+    if (this.id !== 'nuevo') {
+      this._heroe.getHeroeById(this.id)
+        .subscribe((res: any) => {
+          this.heroe = res;
+          this.heroe.id = this.id;
+          console.log(res);
+        });
+    }
   }
 
   guardar(form: NgForm) {
@@ -46,7 +56,8 @@ export class HeroeComponent implements OnInit {
           timer: 1500
         });
       });
-    } else {
+    }
+    else {
       peticion = this._heroe.postHeroes(this.heroe).subscribe(res => {
         Swal.fire({
           title: this.heroe.nombre,
